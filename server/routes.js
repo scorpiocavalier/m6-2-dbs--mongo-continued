@@ -1,23 +1,43 @@
 require('dotenv').config()
-const {MONGO_URI} = process.env
+const { MONGO_URI } = process.env
+const { MongoClient } = require('mongodb')
 const router = require("express").Router()
 
 ///////////////////////////////////////////////////////////////
 
-const seats = {}
+let seats
 const NUM_OF_ROWS = 8
 const SEATS_PER_ROW = 12
-let state, lastBookingAttemptSucceeded = false
-const row = [ "A", "B", "C", "D", "E", "F", "G", "H" ]
+const collectionName = 'seats'
+let state, client, lastBookingAttemptSucceeded = false
 
 ///////////////////////////////////////////////////////////////
 
-for (let r = 0; r < row.length; r++) {
-  for (let s = 1; s < 13; s++) {
-    seats[ `${ row[ r ] }-${ s }` ] = {
-      price: 400 - r * 25,
-      isBooked: false,
-    }
+const dbInit = async () => {
+  const dbName = 'seat_booking'
+  const options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+
+  client = await MongoClient(MONGO_URI, options).connect()
+  return client.db(dbName)
+}
+
+const dbClose = () => client.close()
+
+///////////////////////////////////////////////////////////////
+
+const getSeats = async (req, res) => {
+  try {
+    const db = await dbInit()
+
+    seats = await db.collection(collectionName).find().toArray()
+    console.log('seats', seats)
+
+    dbClose()
+  } catch (err) {
+    res.status(400).json({ status: 400, data: err.message })
   }
 }
 
@@ -105,6 +125,10 @@ router.post("/api/book-seat", async (req, res) => {
     success: true,
   })
 })
+
+///////////////////////////////////////////////////////////////
+
+getSeats()
 
 ///////////////////////////////////////////////////////////////
 
