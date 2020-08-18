@@ -1,6 +1,4 @@
-require('dotenv').config()
-const { MONGO_URI } = process.env
-const { MongoClient } = require('mongodb')
+const { dbInit, dbClose } = require('./handlers')
 
 ///////////////////////////////////////////////////////////////
 
@@ -8,7 +6,6 @@ const seats = []
 const row = [ "A", "B", "C", "D", "E", "F", "G", "H" ]
 const NUM_OF_ROWS = row.length
 const SEATS_PER_ROW = 12
-let client
 
 ///////////////////////////////////////////////////////////////
 
@@ -27,21 +24,6 @@ const generateSeats = () => {
 
   console.log('seats', seats)
 }
-
-///////////////////////////////////////////////////////////////
-
-const dbInit = async () => {
-  const dbName = 'seat_booking'
-  const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-
-  client = await MongoClient(MONGO_URI, options).connect()
-  return client.db(dbName)
-}
-
-const dbClose = () => client.close()
 
 ///////////////////////////////////////////////////////////////
 
