@@ -1,3 +1,5 @@
+require('dotenv').config()
+const {MONGO_URI} = process.env
 const router = require("express").Router()
 
 ///////////////////////////////////////////////////////////////
